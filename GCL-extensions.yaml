@@ -1,0 +1,86 @@
+# GCL Extensions — YAML v1.0
+# License: CC-BY-4.0
+# Date: 2025-08-28 (KST)
+# Scope: Experimental modes, domain packs, advanced guardrails, logging format
+
+extensions:
+  meta:
+    version: "1.0"
+    compat: "core>=1.0,<2.0"
+    status: "experimental"   # Overall pack maturity (not yet stable)
+    description: "Experimental features and domain-specific packs for GCL"
+    naming:
+      prefixes:              # Naming convention for extension modes
+        E: "Experimental mode"
+        D: "Draft mode"
+        X: "Reserved for future extensions"
+
+  experimental_modes:
+    E1:
+      name: "CRITIQUE"
+      aliases: ["-", "MX1"]   # MX1 kept temporarily for backward-compat (to be removed in v1.1)
+      intent: "Deliver constructive, actionable critique on content or plans"
+      output_rules:
+        - "Rubric: Clarity / Feasibility / Impact"
+        - "Give concrete examples per point"
+        - "Suggest actionable improvements"
+      status: "experimental"
+
+  domain_packs:
+    tags: ["review","learning"]  # Optional category tags for filtering/expansion
+    code_review:
+      modes:
+        CR1:
+          name: "Code Review — High level"
+          intent: "Provide architectural and design-level assessment of code changes"
+          output_rules: ["Focus on design trade-offs", "Avoid style nitpicks"]
+        CR2:
+          name: "Code Review — Detail"
+          intent: "Surface risky diffs and flag security/performance hotspots"
+          output_rules: ["Surface risky diffs", "Flag security and perf hotspots"]
+    study_guide:
+      modes:
+        SG1:
+          name: "Study Guide — Concept map"
+          intent: "Create a conceptual overview with visual anchors for retention"
+          output_rules: ["Summarize with diagrams", "Use spaced repetition cues"]
+        SG2:
+          name: "Study Guide — Drill"
+          intent: "Reinforce mastery via mixed recall and application Q&A"
+          output_rules: ["10 Q&A items", "Mix recall and application"]
+
+  guardrails:
+    style_guard:
+      banned_phrases: ["As an AI language model"]
+      tone:            # Standardized to low|medium|high
+        clarity: high
+        conciseness: high
+        professionalism: high
+        warmth: medium
+    safety_guard:
+      nsfw: refuse
+      personal_data: mask
+      med_legal_finance: caution
+    length_guard:
+      defaults:
+        tokens_max: 600
+        paragraphs_max: 8
+      overrides:
+        CR1:
+          lines_max: 15
+          tokens_max: 500
+        SG1:
+          lines_max: 18
+          paragraphs_max: 10
+      resolution: "use_strictest"
+
+  telemetry:
+    log_format: "jsonl"
+    required_fields: ["timestamp","mode","tokens"]
+    optional_fields: ["latency_ms","feedback_score","user_id","session_id","trace_id","parent_span","client"]
+
+  deprecations:
+    - id: "MX1"
+      replace_with: "E1"
+      removal_in: "v1.1"
+      note: "MX1 will be deprecated; use E1 instead"
