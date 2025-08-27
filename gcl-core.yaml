@@ -1,64 +1,60 @@
 # GCL Core Declaration — YAML v1.0
 # License: CC-BY-4.0
 # Date: 2025-08-28 (KST)
-# Scope: Minimal core + guardrails + experimental critique + aliases/ui_terms
+# Scope: Core spec (lean core, extensible via packs)
 
 GCL:
-  # Section: meta — Versioning, locale, license, description, size budget
   meta:
     version: "1.0"
+    status: "stable"                         # stable|draft|experimental
+    compat: "core>=1.0,<2.0"
     locale: ["en-US", "ko-KR"]
     license: "CC-BY-4.0"
     description: "Guided Conversation/Command Language for LLM Work"
     size_budget_kib: 8
 
-  # Section: core_modes — Minimal canonical modes (symbol-first). Aliases map here.
-  core_modes:
-    "!":
+  # Canonical, namespace-first IDs. Symbols map here via aliases.
+  modes:
+    M1:
       name: FAST
+      status: "stable"
+      aliases: ["!"]
       intent: "Quick draft / 3-line summary"
       output_rules:
         - "Concise bullets"
         - "≤3 lines"
-    "++":
+    M2:
       name: DEEP
+      status: "stable"
+      aliases: ["++"]
       intent: "Structured deep analysis"
       output_rules:
         - "5-Why style reasoning"
         - "Evidence included"
-    ">":
+    M3:
       name: EXEC
+      status: "stable"
+      aliases: [">"]
       intent: "Executive briefing"
       output_rules:
         - "1-page structure"
         - "Decision-ready"
 
-  # Section: experimental_modes — Optional features for trial use.
-  experimental_modes:
-    "-":
-      name: CRITIQUE
-      intent: "Constructive feedback and critique"
-      output_rules:
-        - "Rubric: Clarity / Feasibility / Impact"
-        - "Give concrete examples per point"
-        - "Suggest actionable improvements"
-      status: "experimental"
-
-  # Section: options — Lightweight modifiers that adjust style/length.
+  # Lightweight modifiers (non-breaking). Short namespace for extensibility.
   options:
-    mode_hint:
+    hint:
       balanced:
         description: "5–7 lines, include brief evidence"
-        applies_to: ["!", "++", ">"]
+        applies_to: ["M1","M2","M3"]
 
-  # Section: guardrails — Output constraints & citation labeling.
+  # Core guardrails; heavy style/safety guards live in extension packs.
   guardrails:
+    extensible: true                         # Extension packs can add style/safety guards
     max_preamble: 1
     token_limit:
-      "!": 250
-      "++": 800
-      ">": 600
-      "-": 500
+      M1: 250
+      M2: 800
+      M3: 600
     cite_policy:
       labels:
         source: "source"
@@ -67,50 +63,58 @@ GCL:
         - "When citing, tag with 'source'."
         - "When asserting without external sources, tag as 'inference'."
 
-  # Section: templates — Reusable structures and variables.
+  # Minimal skeletons (keep uniform keys across modes)
   templates:
-    deep:
-      variables: ["{user_input}", "{context}"]
+    M1:
+      section_template: []                   # FAST: intentionally no sections
+    M2:
       section_template:
         - name: "Analysis"
         - name: "Evidence"
         - name: "Self-Review"
-          rule: "Reasoning outline only (2–3 lines); no step-by-step chain-of-thought."
+    M3:
+      section_template:
+        - name: "Summary"
+        - name: "Impacts"
+        - name: "Actions"
 
-  # Section: telemetry — KPIs for feedback-driven improvement.
+  # Minimal KPIs + optional log schema for consistency across packs
   telemetry:
     kpi: ["reuse_rate", "intent_match", "user_satisfaction"]
+    log_format: "jsonl"
+    fields: ["timestamp","mode","tokens"]    # REQUIRED baseline
+    # OPTIONAL (recommended): "latency_ms","feedback_score"
 
-  # Section: aliases — Natural-language triggers mapped to canonical modes/options.
+  # Natural-language triggers. Options use short keys; resolver expands to options.hint.*
   aliases:
     en-US:
       modes:
-        "quick summary": "!"
-        "fast draft": "!"
-        "deep analysis": "++"
-        "executive brief": ">"
-        "critique": "-"
+        "quick summary": "M1"
+        "fast draft": "M1"
+        "deep analysis": "M2"
+        "executive brief": "M3"
       options:
-        "balanced": "options.mode_hint.balanced"
-        "balanced summary": "options.mode_hint.balanced"
+        "balanced": "balanced"               # → resolves to options.hint.balanced
+        # Back-compat (deprecated; removal planned in 2.0):
+        "balanced_legacy": "options.mode_hint.balanced"
     ko-KR:
       modes:
-        "빠르게 요약": "!"
-        "빠른 초안": "!"
-        "심층 분석": "++"
-        "임원 보고": ">"
-        "비평": "-"
+        "빠르게 요약": "M1"
+        "빠른 초안": "M1"
+        "심층 분석": "M2"
+        "임원 보고": "M3"
       options:
-        "균형 요약": "options.mode_hint.balanced"
-        "밸런스": "options.mode_hint.balanced"
+        "균형 요약": "balanced"
+        "균형 요약_레거시": "options.mode_hint.balanced"
 
-  # Section: ui_terms — Localized display labels for conceptual groups.
+  # Localized display labels (docs/UI)
   ui_terms:
-    en-US:
-      core_modes: "Output formats"
-      modules: "Add-ons"
-      domain_packs: "Expert packs"
-    ko-KR:
-      core_modes: "결과물 양식"
-      modules: "부가 기능"
-      domain_packs: "전문가 모드"
+    en-US: { core_modes: "Output formats", modules: "Add-ons", domain_packs: "Expert packs" }
+    ko-KR: { core_modes: "결과물 양식",        modules: "부가 기능",    domain_packs: "전문가 모드" }
+
+# --- Resolver Notes (non-normative) ---
+# R1: Short option key "balanced" MUST resolve to options.hint.balanced.
+# R2: Legacy path "options.mode_hint.balanced" SHOULD be accepted for back-compat
+#     (marked as deprecated; removal planned in 2.0).
+# R3: If guardrails.extensible == true, extension packs MAY define:
+#     guardrails.style_guard.*, guardrails.safety_guard.*, guardrails.length_guard.* (optional).
