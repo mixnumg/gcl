@@ -1,4 +1,4 @@
-# GCL: Guided Conversation Language for LLM Work  
+# GCL - Guided Conversation Language for LLM Work  
 *A lightweight notation for guiding your interactions with Large Language Models (LLMs)*
 
 `gcl-core.yaml` | License: CC-BY-4.0
@@ -64,10 +64,20 @@ GCL/
 
 ## Roadmap
 
-- [x] Core declaration (v1.0)  
-- [ ] Add more domain examples  
-- [ ] Write detailed documentation and guides  
-- [ ] Open to community issues and PRs  
+- **v1.0 (current)**  
+  Core declaration (`gcl-core.yaml`), base symbols (!, ++, >), initial README  
+
+- **v1.1 (planned for Q4 2025)**  
+  Domain-specific examples (tech, research, workspace, learning, policy)  
+  Minimal usage guide in `/docs`  
+
+- **v1.2 (planned for 2026 H1)**  
+  Extended option modes (`:tutor`, `:creative`, `:story`)  
+  Advanced multi-domain examples and usage patterns  
+
+- **v2.0 (future)**  
+  Full documentation set (manual, architecture, best practices)  
+  Open community contributions (issues/PRs, external examples)
 
 ---
 
@@ -77,3 +87,31 @@ This project is licensed under the **Creative Commons Attribution 4.0 Internatio
 
 You are free to use, modify, and share it, as long as you give proper attribution.  
 For the full text, see the [LICENSE](./LICENSE) file.
+
+---
+
+## Vision
+
+Although GCL is designed to be LLM-agnostic, at the moment I can only use it fully with GPT (where memory storage is available).  
+Other LLMs don’t yet support this kind of persistent setup easily.
+
+My hope is that, in the future, chat interfaces for any LLM will come with simple buttons like:  
+[⚡️ Quick Draft] [🤔 Deep Analysis] [👨‍💼 Exec Brief]  
+
+Even better, users could define their own **custom modes** in `gcl-core.yaml`, and the chat UI would generate matching buttons automatically.  
+For example:  
+
+```yaml
+modes:
+  research-critique:
+    token: "??"
+    intent: "evaluate_research"
+    spec:
+      steps: ["summary", "strengths", "weaknesses", "future-work"]
+```
+
+This would render as a button like [🧪 Research Critique] directly in the interface.
+
+That way, GCL could serve as both a shared convention and a customizable interface layer for all LLMs.
+
+---
