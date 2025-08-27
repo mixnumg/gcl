@@ -1,0 +1,116 @@
+# GCL Core Declaration — YAML v1.0
+# License: CC-BY-4.0
+# Date: 2025-08-28 (KST)
+# Scope: Minimal core + guardrails + experimental critique + aliases/ui_terms
+
+GCL:
+  # Section: meta — Versioning, locale, license, description, size budget
+  meta:
+    version: "1.0"
+    locale: ["en-US", "ko-KR"]
+    license: "CC-BY-4.0"
+    description: "Guided Conversation/Command Language for LLM Work"
+    size_budget_kib: 8
+
+  # Section: core_modes — Minimal canonical modes (symbol-first). Aliases map here.
+  core_modes:
+    "!":
+      name: FAST
+      intent: "Quick draft / 3-line summary"
+      output_rules:
+        - "Concise bullets"
+        - "≤3 lines"
+    "++":
+      name: DEEP
+      intent: "Structured deep analysis"
+      output_rules:
+        - "5-Why style reasoning"
+        - "Evidence included"
+    ">":
+      name: EXEC
+      intent: "Executive briefing"
+      output_rules:
+        - "1-page structure"
+        - "Decision-ready"
+
+  # Section: experimental_modes — Optional features for trial use.
+  experimental_modes:
+    "-":
+      name: CRITIQUE
+      intent: "Constructive feedback and critique"
+      output_rules:
+        - "Rubric: Clarity / Feasibility / Impact"
+        - "Give concrete examples per point"
+        - "Suggest actionable improvements"
+      status: "experimental"
+
+  # Section: options — Lightweight modifiers that adjust style/length.
+  options:
+    mode_hint:
+      balanced:
+        description: "5–7 lines, include brief evidence"
+        applies_to: ["!", "++", ">"]
+
+  # Section: guardrails — Output constraints & citation labeling.
+  guardrails:
+    max_preamble: 1
+    token_limit:
+      "!": 250
+      "++": 800
+      ">": 600
+      "-": 500
+    cite_policy:
+      labels:
+        source: "source"
+        inference: "inference"
+      rules:
+        - "When citing, tag with 'source'."
+        - "When asserting without external sources, tag as 'inference'."
+
+  # Section: templates — Reusable structures and variables.
+  templates:
+    deep:
+      variables: ["{user_input}", "{context}"]
+      section_template:
+        - name: "Analysis"
+        - name: "Evidence"
+        - name: "Self-Review"
+          rule: "Reasoning outline only (2–3 lines); no step-by-step chain-of-thought."
+
+  # Section: telemetry — KPIs for feedback-driven improvement.
+  telemetry:
+    kpi: ["reuse_rate", "intent_match", "user_satisfaction"]
+
+  # Section: aliases — Natural-language triggers mapped to canonical modes/options.
+  aliases:
+    en-US:
+      modes:
+        "quick summary": "!"
+        "fast draft": "!"
+        "deep analysis": "++"
+        "executive brief": ">"
+        "critique": "-"
+      options:
+        "balanced": "options.mode_hint.balanced"
+        "balanced summary": "options.mode_hint.balanced"
+    ko-KR:
+      modes:
+        "빠르게 요약": "!"
+        "빠른 초안": "!"
+        "심층 분석": "++"
+        "임원 보고": ">"
+        "비평": "-"
+      options:
+        "균형 요약": "options.mode_hint.balanced"
+        "밸런스": "options.mode_hint.balanced"
+
+  # Section: ui_terms — Localized display labels for conceptual groups.
+  ui_terms:
+    en-US:
+      core_modes: "Output formats"
+      modules: "Add-ons"
+      domain_packs: "Expert packs"
+    ko-KR:
+      core_modes: "결과물 양식"
+      modules: "부가 기능"
+      domain_packs: "전문가 모드"
