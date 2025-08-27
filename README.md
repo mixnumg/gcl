@@ -1,16 +1,16 @@
 # GCL - Guided Conversation Language for LLM Work  
 *A lightweight notation for guiding your interactions with Large Language Models (LLMs)*
 
-`gcl-core.yaml` | License: CC-BY-4.0
+`gcl-core.yaml` | `gcl-extensions.yaml` | License: CC-BY-4.0
 
 ---
 
 ## What is GCL?
 
-GCL is a simple way to tell an LLM what kind of response you want without writing long instructions.  
-Instead of typing *“give me a very short, three-line bulleted summary of…”*, I wanted a faster way to get consistent results.
+GCL is a structured but lightweight way to guide LLM responses without verbose instructions.  
+Instead of typing *“give me a very short, three-line bulleted summary of…”*, you can use compact symbols or keywords to get consistent results.
 
-The core of GCL uses three symbols:
+The **core of GCL** defines three base symbols:
 
 ```
 !   → Fast Draft (3-line summary or concise bullets)
@@ -18,8 +18,28 @@ The core of GCL uses three symbols:
 >   → Exec Brief (1-page briefing note for decision-making)
 ```
 
-This keeps conversations with LLMs short, consistent, and repeatable.  
-On top of that, optional modes like `:tutor`, `:creative`, or `:story` can extend usage across domains such as **Tech, Research, Workplace, Learning, Policy**.
+This keeps conversations short, consistent, and repeatable.  
+
+On top of the core, **optional modes** like `:tutor`, `:creative`, or `:story` extend usage across domains such as **Tech, Research, Workplace, Learning, Policy**.
+
+---
+
+## Updates in v1.0
+
+The following refinements have been added since the initial draft:
+
+- **Tone Levels Standardized**  
+  Unified levels: `low / medium / high` (or optionally a 1–5 numeric scale).
+
+- **Guardrails Enum Extended**  
+  Now supports: `allow / caution / soft_refuse / refuse`  
+  (enabling more nuanced safety handling in domain-specific contexts, e.g., `med_legal_finance: soft_refuse`).
+
+- **Telemetry Extended**  
+  In addition to `trace_id`, optional fields like `parent_span`, `latency_ms`, and `feedback_score` are supported for observability.
+
+- **Domain Packs with Tags**  
+  Domain packs (e.g., `design_doc`, `policy_review`) can now carry **tags** for better categorization and filtering.
 
 ---
 
@@ -50,14 +70,15 @@ LLM (Deep Analysis):
 GCL/
 ├─ README.md
 ├─ LICENSE
-├─ gcl-core.yaml      # The core declaration of GCL
-├─ examples/          # Practical examples for each domain
+├─ GCL-core.yaml            # The core declaration of GCL
+├─ GCL-extensions.yaml      # The extensions declaration of GCL
+├─ examples/                # Practical examples for each domain
 │  ├─ tech/
 │  ├─ research/
 │  ├─ workspace/
 │  ├─ learning/
 │  └─ policy/
-└─ docs/              # Detailed guides and documentation (planned)
+└─ docs/                    # Detailed guides and documentation (planned)
 ```
 
 ---
@@ -65,7 +86,7 @@ GCL/
 ## Roadmap
 
 - **v1.0 (current)**  
-  Core declaration (`gcl-core.yaml`), base symbols (!, ++, >), initial README  
+  Core declaration (`gcl-core.yaml`), base symbols (!, ++, >), extended guardrails, telemetry, tone, and domain packs.
 
 - **v1.1 (planned for Q4 2025)**  
   Domain-specific examples (tech, research, workspace, learning, policy)  
@@ -113,5 +134,3 @@ modes:
 This would render as a button like [🧪 Research Critique] directly in the interface.
 
 That way, GCL could serve as both a shared convention and a customizable interface layer for all LLMs.
-
----
