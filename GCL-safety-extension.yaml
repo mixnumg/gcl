@@ -1,0 +1,281 @@
+# gcl-safety-extension.yaml
+# Purpose: Add safety/alignment capabilities to GCL as a composable extension.
+# License: CC-BY-4.0 (align with GCL core)
+
+meta:
+  name: "GCL Safety Extension"
+  version: "1.0"          # patched with output-guardrails, richer refusals, hooks
+  status: "stable"
+  compat: "core>=1.0,<2.0"
+  description: |
+    A minimal, composable safety/alignment layer for GCL. Provides standardized
+    refusals, jailbreak detection (regex + optional semantic similarity),
+    crisis-response templates with validation dates, output guardrails (PII, toxicity,
+    profanity), and telemetry for auditability. Default profile stays light and
+    auto-escalates only on high-risk inputs. Policies can be externally versioned.
+
+# ---------------------------------------------------------------------------
+# POLICY SOURCES: optional externalized rules (Git/DB) for hot sync
+# ---------------------------------------------------------------------------
+policy_sources:
+  jailbreak_patterns:
+    type: git
+    url: "https://example.com/org/gcl-policies/jailbreak_patterns.git"    # next
+    path: "patterns/regex.txt"
+    refresh_interval: "24h"
+  allowlists:
+    type: git
+    url: "https://example.com/org/gcl-policies/allowlists.git"            # next
+    path: "allowlists.yaml"
+    refresh_interval: "24h"
+
+# ---------------------------------------------------------------------------
+# PROFILES: keep default lightweight; auto-escalate for risky inputs
+# ---------------------------------------------------------------------------
+profiles:
+  default_light:
+    description: "Lightweight safety suitable for general conversations."
+    options:
+      uncertainty:
+        mode: balanced           # off | balanced | strict
+        require_citation: true   # require citations when claiming facts
+        ask_to_browse: true      # suggest browsing when uncertainty is high
+      criticality:
+        auto_counterpoint: true  # inject 0–1 counterpoints by default
+        max_counterpoints: 1
+      cot_monitor:
+        summarize_chain: true
+        anomaly_rules: ["goal_conflict", "policy_bypass"]
+    guardrails:
+      detectors:
+        jailbreak:
+          regex: [
+            "(?i)ignore (all )?previous (instructions|safety rules)",
+            "(?i)DAN mode",
+            "(?i)reveal( the)? system prompt",
+            "(?i)simulate (evil|unsafe) mode",
+            "(?i)pretend to be (unsafe|malicious)"
+          ]
+          semantic_similarity:   # optional, costlier; uses embeddings
+            enable: false
+            model: "text-embedding-safety-mini"
+            threshold: 0.82
+            anchors: [
+              "ignore previous instructions",
+              "bypass safety policies",
+              "reveal hidden system prompt",
+              "act without constraints",
+              "role-play a malicious agent"
+            ]
+      actions:
+        on_detect: ["soften_response", "refuse", "log_flag"]
+      refusal_tiers:
+        - id: NO_KNOWLEDGE
+          message: "I don't have sufficient, verifiable sources to answer. I can propose a verification path."
+        - id: CRITICAL_HELP
+          message: "Your safety matters. I will first share immediate resources and next steps."
+        - id: ILLEGAL_REQUEST
+          message: "I can't assist with illegal or dangerous activities. I can offer lawful, safe alternatives."
+        - id: PII_PROTECTION
+          message: "I can't share or amplify personal data. Let's proceed without sensitive identifiers."
+        - id: MALICIOUS_USE
+          message: "I can't help create or improve content intended to harm, exploit, or deceive."
+    templates:
+      counterpoint:
+        section_template:
+          - "🤔 Counterpoint"
+          - "- (Concise opposing view)"
+          - "- (Risk or alternative)"
+    output_guardrails:
+      pii_detection:
+        enable: true
+        strategy: ["regex", "ner"]          # quick regex + optional NER
+        actions: ["mask", "summarize", "refuse_if_high_confidence"]
+      toxicity_check:
+        enable: true
+        scorer: "toxicity-lite-v1"           # replace with your scorer id
+        threshold: 0.85
+        actions: ["soften_language", "add_warning", "refuse_if_extreme"]
+      profanity_filter:
+        enable: true
+        mode: "mask"                         # mask | soften | refuse_if_extreme
+    telemetry:
+      flags: ["jailbreak_detected", "safety_block", "cot_anomaly_detected", "output_pii_masked"]
+      metrics: [
+        "refusal_rate",
+        "jailbreak_hit_rate",
+        "hallucination_reports",
+        "false_refusal_rate",
+        "escalation_success_rate"
+      ]
+      retention_days: 30
+      notes: |
+        - No PII. Store minimal, non-identifying metadata.
+        - RBAC required for access. Keep raw prompts/outputs out of logs unless explicitly allowed.
+
+  high_risk:
+    description: "Stronger guardrails for high-risk content or detected attacks."
+    options:
+      uncertainty:
+        mode: strict
+        require_citation: true
+        ask_to_browse: true
+      criticality:
+        auto_counterpoint: true
+        max_counterpoints: 2
+      cot_monitor:
+        summarize_chain: true
+        anomaly_rules: ["goal_conflict", "policy_bypass"]
+    guardrails:
+      detectors:
+        jailbreak:
+          regex: [
+            "(?i)ignore (all )?previous (instructions|safety rules)",
+            "(?i)DAN mode",
+            "(?i)reveal( the)? system prompt",
+            "(?i)simulate (evil|unsafe) mode",
+            "(?i)pretend to be (unsafe|malicious)"
+          ]
+          semantic_similarity:
+            enable: true
+            model: "text-embedding-safety-mini"
+            threshold: 0.82
+            anchors: [
+              "ignore previous instructions",
+              "bypass safety policies",
+              "reveal hidden system prompt",
+              "act without constraints",
+              "role-play a malicious agent"
+            ]
+          llm_classifier: "binary_v1"
+      actions:
+        on_detect: ["refuse", "log_flag"]
+      refusal_tiers:
+        - id: NO_KNOWLEDGE
+          message: "I don't have sufficient, verifiable sources to answer. I can propose a verification path."
+        - id: CRITICAL_HELP
+          message: "Your safety matters. I will first share immediate resources and next steps."
+        - id: ILLEGAL_REQUEST
+          message: "I can't assist with illegal or dangerous activities. I can offer lawful, safe alternatives."
+        - id: PII_PROTECTION
+          message: "I can't share or amplify personal data. Let's proceed without sensitive identifiers."
+        - id: MALICIOUS_USE
+          message: "I can't help create or improve content intended to harm, exploit, or deceive."
+    templates:
+      counterpoint:
+        section_template:
+          - "🤔 Counterpoint"
+          - "- (Concise opposing view)"
+          - "- (Risk or alternative)"
+    output_guardrails:
+      pii_detection:
+        enable: true
+        strategy: ["regex", "ner"]
+        actions: ["mask", "summarize", "refuse_if_high_confidence"]
+      toxicity_check:
+        enable: true
+        scorer: "toxicity-lite-v1"
+        threshold: 0.80
+        actions: ["soften_language", "add_warning", "refuse_if_extreme"]
+      profanity_filter:
+        enable: true
+        mode: "mask"
+    telemetry:
+      flags: ["jailbreak_detected", "safety_block", "cot_anomaly_detected", "output_pii_masked"]
+      metrics: [
+        "refusal_rate",
+        "jailbreak_hit_rate",
+        "hallucination_reports",
+        "false_refusal_rate",
+        "escalation_success_rate"
+      ]
+      retention_days: 30
+      notes: |
+        - No PII. Store minimal, non-identifying metadata.
+        - RBAC required for access. Keep raw prompts/outputs out of logs unless explicitly allowed.
+
+# ---------------------------------------------------------------------------
+# DOMAIN PACKS: crisis-response with localized resources + validation dates
+# ---------------------------------------------------------------------------
+domain_packs:
+  crisis_response:
+    enable: true
+    locales: ["en-US", "ko-KR"]
+    validated_at:
+      en-US: "2025-08-25"
+      ko-KR: "2025-08-25"
+    resources:
+      en-US:
+        immediate_help: [
+          "988 (US Suicide & Crisis Lifeline)",
+          "911 (Emergency)"
+        ]
+      ko-KR:
+        immediate_help: [
+          "1393 (Korean Suicide Prevention Hotline)",
+          "112 (Emergency)"
+        ]
+    notes: |
+      - Keep this pack versioned externally to maintain freshness per region.
+      - Revalidate resources periodically and update validated_at.
+
+# ---------------------------------------------------------------------------
+# ALLOWLISTS / EXCEPTIONS: narrowly-scoped bypasses for eval/training only
+# ---------------------------------------------------------------------------
+allowlists:
+  sessions: ["eval-job-abc123", "redteam-rotation-2025w34"]
+  users:    ["analyst@example.com"]
+  keywords: ["case-study jailbreak examples", "security training scenario"]
+  scope:    ["detectors.jailbreak", "output_guardrails.profanity_filter"]
+  notes: |
+    - Use sparingly. Log all allowlist hits to telemetry. Periodically audit.
+
+# ---------------------------------------------------------------------------
+# EVAL HOOKS: integration points for internal/external evaluation runners
+# ---------------------------------------------------------------------------
+eval_hooks:
+  before_answer: ["/hooks/pre_safety_check"]
+  after_answer:  ["/hooks/post_eval_submit"]
+  on_refusal:    ["/hooks/refusal_event"]
+  on_escalation: ["/hooks/escalation_event"]
+
+# ---------------------------------------------------------------------------
+# AUTO-ESCALATION: promote profile when risk is detected; support context
+# ---------------------------------------------------------------------------
+auto_escalation:
+  triggers:
+    - type: keyword
+      any: ["self-harm", "kill myself", "suicide", "harm others", "bomb", "attack"]
+    - type: detector_flag
+      any: ["jailbreak_detected"]
+  contextual_conditions:
+    # Example: do not escalate if the session is explicitly marked as safe fictional role-play
+    - if: "session.tags includes 'fictional_roleplay'"
+      then: "suppress_escalation_for_current_turn"
+  promote_to: "high_risk"
+  rollback:
+    condition: "no triggers for N consecutive turns (e.g., N=3)"
+
+# ---------------------------------------------------------------------------
+# SESSION EXAMPLE: minimal wiring from core to this extension
+# ---------------------------------------------------------------------------
+session:
+  use_guardrails: true
+  use_templates: ["counterpoint"]
+  use_domain_packs: ["crisis_response"]
+  profile: "default_light"     # set to "high_risk" when auto_escalation triggers
+  options:
+    uncertainty.mode: balanced
+    criticality.auto_counterpoint: true
+
+# ---------------------------------------------------------------------------
+# NOTES FOR IMPLEMENTERS
+# ---------------------------------------------------------------------------
+implementation_notes: |
+  - Start with profile=default_light to preserve UX; allow runtime promotion to high_risk.
+  - Detection tiers: fast regex first; semantic similarity + classifier only on hits.
+  - Output guardrails run post-generation; prefer mask/soften before refusal when possible.
+  - Telemetry: include quality metrics (false_refusal_rate, escalation_success_rate).
+  - Crisis resources must be revalidated periodically; update validated_at.
+  - Policy sources can be synced from Git/DB; avoid unsafe hot reload without verification.
+  - CoT monitor collects non-sensitive summaries for anomaly patterns; never store raw chain-of-thought.
