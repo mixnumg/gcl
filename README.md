@@ -1,16 +1,17 @@
 # GCL - Guided Conversation Language for LLM Work  
 *A lightweight notation for guiding your interactions with Large Language Models (LLMs)*
 
-`gcl-core.yaml` | `gcl-extensions.yaml` | License: CC-BY-4.0
+`GCL-core.yaml` | `GCL-extensions.yaml` | `GCL-safety-extension.yaml` | License: CC-BY-4.0
 
 ---
 
 ## What is GCL?
 
-GCL is a structured but lightweight way to guide LLM responses without verbose instructions.  
-Instead of typing *“give me a very short, three-line bulleted summary of…”*, you can use compact symbols or keywords to get consistent results.
+GCL (Guided Conversation Language) is a **notation system** for controlling how LLMs respond, without long or repetitive instructions.  
+Instead of typing *“Please write me a short, three-line summary”*, you can simply use compact symbols or keywords for consistent, predictable results.
 
-The **core of GCL** defines three base symbols:
+### Core Symbols
+
 
 ```
 !   → Fast Draft (3-line summary or concise bullets)
@@ -18,35 +19,52 @@ The **core of GCL** defines three base symbols:
 >   → Exec Brief (1-page briefing note for decision-making)
 ```
 
-This keeps conversations short, consistent, and repeatable.  
+### Extended Modes
 
-On top of the core, **optional modes** like `:tutor`, `:creative`, or `:story` extend usage across domains such as **Tech, Research, Workplace, Learning, Policy**.
+- `:tutor` → English practice / correction  
+- `:creative` → Brainstorming & ideation  
+- `:story` → Narrative / storytelling  
+
+These optional tags extend GCL across **Tech, Research, Workplace, Learning, Policy** and more.
+
 
 ---
 
 ## Updates in v1.0
 
-The following refinements have been added since the initial draft:
+The specification has evolved with three YAML declarations:
+
+- **Core Declaration (`GCL-core.yaml`)**  
+  Defines the base modes, symbols, and templates.
+
+- **Extensions (`GCL-extensions.yaml`)**  
+  Adds optional features, such as domain packs, telemetry fields, and flexible option namespaces.
+
+- **Safety Extension (`GCL-safety-extension.yaml`)**  
+  Introduces guardrails, refusal tiers, and policy-safety mappings.
+
+---
+
+### Key Refinements
 
 - **Tone Levels Standardized**  
-  Unified levels: `low / medium / high` (or optionally a 1–5 numeric scale).
+  Unified scale: `low / medium / high` (numeric 1–5 optional).  
 
 - **Guardrails Enum Extended**  
-  Now supports: `allow / caution / soft_refuse / refuse`  
-  (enabling more nuanced safety handling in domain-specific contexts, e.g., `med_legal_finance: soft_refuse`).
+  More nuanced handling: `allow / caution / soft_refuse / refuse`.  
 
-- **Telemetry Extended**  
-  In addition to `trace_id`, optional fields like `parent_span`, `latency_ms`, and `feedback_score` are supported for observability.
+- **Telemetry Expanded**  
+  Supports `trace_id`, `parent_span`, `latency_ms`, `feedback_score`.  
 
 - **Domain Packs with Tags**  
-  Domain packs (e.g., `design_doc`, `policy_review`) can now carry **tags** for better categorization and filtering.
+  Domain packs (e.g., `design_doc`, `policy_review`) now support **tags** for categorization and filtering.  
 
 ---
 
 ## How to Use
 
-1. Start your chat with a short note that the LLM should follow GCL rules.  
-2. Use the symbols at the beginning of your prompt to guide the style.  
+1. At the start of your chat, note that the LLM should follow GCL rules.  
+2. Prefix your request with a symbol or mode.  
 
 **Example**
 
@@ -70,16 +88,16 @@ LLM (Deep Analysis):
 GCL/
 ├─ README.md
 ├─ LICENSE
-├─ GCL-core.yaml            # The core declaration of GCL
-├─ GCL-extensions.yaml      # The extensions declaration of GCL
-├─ examples/                # Practical examples for each domain
+├─ GCL-core.yaml              # Core declaration
+├─ GCL-extensions.yaml        # Extension declaration
+├─ GCL-safety-extension.yaml  # Safety/guardrail declaration
+├─ examples/                  # Domain examples
 │  ├─ tech/
 │  ├─ research/
-│  ├─ workspace/
+│  ├─ workplace/
 │  ├─ learning/
 │  └─ policy/
-└─ docs/                    # Detailed guides and documentation (planned)
-```
+└─ docs/                      # Guides & manual (planned)
 
 ---
 
@@ -89,16 +107,13 @@ GCL/
   Core declaration (`gcl-core.yaml`), base symbols (!, ++, >), extended guardrails, telemetry, tone, and domain packs.
 
 - **v1.1 (planned for Q4 2025)**  
-  Domain-specific examples (tech, research, workspace, learning, policy)  
-  Minimal usage guide in `/docs`  
+  More examples per domain, minimal /docs usage guide. 
 
 - **v1.2 (planned for 2026 H1)**  
-  Extended option modes (`:tutor`, `:creative`, `:story`)  
-  Advanced multi-domain examples and usage patterns  
+  Extended option modes (:tutor, :creative, :story), advanced multi-domain patterns.
 
 - **v2.0 (future)**  
-  Full documentation set (manual, architecture, best practices)  
-  Open community contributions (issues/PRs, external examples)
+  Full manual, best practices, and open community contributions.
 
 ---
 
