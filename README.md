@@ -1,70 +1,64 @@
-# GCL - Guided Conversation Language for LLM Work  
-*A lightweight notation for guiding your interactions with Large Language Models (LLMs)*
+> **Notice (Draft Spec)**  
+> This repository contains an **early draft specification** of the Guided Conversation Language (GCL).  
+> It is experimental and under active refinement.  
+> Examples, usage guides, and UI prototypes will be added in future releases (v1.1+).  
+> Feedback, issues, and discussions are welcome.  
 
-`GCL-core.yaml` | `GCL-extensions.yaml` | `GCL-safety-extension.yaml` | License: CC-BY-4.0
+---
+
+# GCL - Guided Conversation Language for LLM Work  
+*A lightweight and structured notation for guiding Large Language Models (LLMs)*
+
+`GCL-core.yaml` | `GCL-extensions.yaml` | `GCL-safety-extension.yaml`  
+License: CC-BY-4.0
 
 ---
 
 ## What is GCL?
 
-GCL (Guided Conversation Language) is a **notation system** for controlling how LLMs respond, without long or repetitive instructions.  
-Instead of typing *“Please write me a short, three-line summary”*, you can simply use compact symbols or keywords for consistent, predictable results.
+GCL (Guided Conversation Language) is a **notation system** for shaping LLM outputs without verbose prompts.  
+Instead of typing *“Please give me a short, three-line summary”*, you can use compact symbols for consistent results.
 
 ### Core Symbols
 
-
 ```
-!   → Fast Draft (3-line summary or concise bullets)
-++  → Deep Analysis (Why×5, reasoning, risks, evidence)
->   → Exec Brief (1-page briefing note for decision-making)
+!   → Fast Draft (3-line summary or concise bullets)  
+++  → Deep Analysis (Why×5, reasoning, evidence, risks)  
+>   → Exec Brief (1-page decision note for leaders)
 ```
 
 ### Extended Modes
 
-- `:tutor` → English practice / correction  
+- `:tutor` → Language tutoring & correction  
 - `:creative` → Brainstorming & ideation  
 - `:story` → Narrative / storytelling  
 
-These optional tags extend GCL across **Tech, Research, Workplace, Learning, Policy** and more.
-
-
----
-
-## Updates in v1.0
-
-The specification has evolved with three YAML declarations:
-
-- **Core Declaration (`GCL-core.yaml`)**  
-  Defines the base modes, symbols, and templates.
-
-- **Extensions (`GCL-extensions.yaml`)**  
-  Adds optional features, such as domain packs, telemetry fields, and flexible option namespaces.
-
-- **Safety Extension (`GCL-safety-extension.yaml`)**  
-  Introduces guardrails, refusal tiers, and policy-safety mappings.
+Optional tags extend GCL across **Tech, Research, Workplace, Learning, Policy**.
 
 ---
 
-### Key Refinements
+## Draft Status
 
-- **Tone Levels Standardized**  
-  Unified scale: `low / medium / high` (numeric 1–5 optional).  
+This repo is currently released as a **Draft Specification (v1.0)**.  
+- **Purpose**: Share the concept early and collect feedback.  
+- **Scope**: Core YAML declarations are stable, but examples and docs are incomplete.  
+- **Next Steps**: Add domain examples, improve `/docs`, and publish a simple UI prototype.  
 
-- **Guardrails Enum Extended**  
-  More nuanced handling: `allow / caution / soft_refuse / refuse`.  
+---
 
-- **Telemetry Expanded**  
-  Supports `trace_id`, `parent_span`, `latency_ms`, `feedback_score`.  
+## Key Updates in v1.0
 
-- **Domain Packs with Tags**  
-  Domain packs (e.g., `design_doc`, `policy_review`) now support **tags** for categorization and filtering.  
+- **Tone Levels Standardized** → `low / medium / high` (optionally 1–5 scale).  
+- **Guardrails Enum Extended** → `allow / caution / soft_refuse / refuse`.  
+- **Telemetry Expanded** → `trace_id`, `parent_span`, `latency_ms`, `feedback_score`.  
+- **Domain Packs with Tags** → Better categorization/filtering for packs like `design_doc`, `policy_review`.  
 
 ---
 
 ## How to Use
 
-1. At the start of your chat, note that the LLM should follow GCL rules.  
-2. Prefix your request with a symbol or mode.  
+1. Start your chat with a short note that the LLM should follow GCL rules.  
+2. Use the symbols at the beginning of your prompt.  
 
 **Example**
 
@@ -76,9 +70,9 @@ LLM (Deep Analysis):
 - Kubernetes is an open-source container orchestration platform...
 - It groups containers into Pods and abstracts infrastructure...
 - Risks: complexity, steep learning curve, misconfiguration issues...
-
-→ More examples can be found in the [/examples](./examples) folder.
 ```
+
+See more in the [/examples](./examples) folder.
 
 ---
 
@@ -91,51 +85,48 @@ GCL/
 ├─ GCL-core.yaml              # Core declaration
 ├─ GCL-extensions.yaml        # Extension declaration
 ├─ GCL-safety-extension.yaml  # Safety/guardrail declaration
-├─ examples/                  # Domain examples
+├─ examples/                  # Domain examples (in progress)
 │  ├─ tech/
 │  ├─ research/
 │  ├─ workplace/
 │  ├─ learning/
 │  └─ policy/
 └─ docs/                      # Guides & manual (planned)
+```
 
 ---
 
 ## Roadmap
 
 - **v1.0 (current)**  
-  Core declaration (`gcl-core.yaml`), base symbols (!, ++, >), extended guardrails, telemetry, tone, and domain packs.
+  Core symbols (!, ++, >), tone levels, guardrails, telemetry, domain packs.  
 
-- **v1.1 (planned for Q4 2025)**  
-  More examples per domain, minimal /docs usage guide. 
+- **v1.1 (planned, Q4 2025)**  
+  Domain-specific examples + minimal usage guide.  
 
-- **v1.2 (planned for 2026 H1)**  
-  Extended option modes (:tutor, :creative, :story), advanced multi-domain patterns.
+- **v1.2 (planned, H1 2026)**  
+  Extended option modes (`:tutor`, `:creative`, `:story`) + advanced patterns.  
 
 - **v2.0 (future)**  
-  Full manual, best practices, and open community contributions.
+  Full manual, best practices, and open community contributions.  
 
 ---
 
 ## License
 
-This project is licensed under the **Creative Commons Attribution 4.0 International License (CC-BY-4.0)**.  
-
-You are free to use, modify, and share it, as long as you give proper attribution.  
-For the full text, see the [LICENSE](./LICENSE) file.
+Licensed under **Creative Commons Attribution 4.0 International (CC-BY-4.0)**.  
+Use, modify, and share with attribution. See [LICENSE](./LICENSE).
 
 ---
 
 ## Vision
 
-Although GCL is designed to be LLM-agnostic, at the moment I can only use it fully with GPT (where memory storage is available).  
-Other LLMs don’t yet support this kind of persistent setup easily.
+GCL is designed to be **LLM-agnostic**.  
+In the future, chat UIs could present simple buttons like:  
 
-My hope is that, in the future, chat interfaces for any LLM will come with simple buttons like:  
-[⚡️ Quick Draft] [🤔 Deep Analysis] [👨‍💼 Exec Brief]  
+[⚡ Quick Draft] [🤔 Deep Analysis] [👨‍💼 Exec Brief]  
 
-Even better, users could define their own **custom modes** in `gcl-core.yaml`, and the chat UI would generate matching buttons automatically.  
-For example:  
+Or auto-generate buttons from YAML-defined modes, e.g.:
 
 ```yaml
 modes:
@@ -146,6 +137,6 @@ modes:
       steps: ["summary", "strengths", "weaknesses", "future-work"]
 ```
 
-This would render as a button like [🧪 Research Critique] directly in the interface.
+Rendering as [🧪 Research Critique] directly in the interface.  
 
-That way, GCL could serve as both a shared convention and a customizable interface layer for all LLMs.
+Thus, GCL is both a **shared convention** and a **customizable interface layer** for all LLMs.
