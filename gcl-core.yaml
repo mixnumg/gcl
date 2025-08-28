@@ -118,3 +118,4 @@ GCL:
 #     (marked as deprecated; removal planned in 2.0).
 # R3: If guardrails.extensible == true, extension packs MAY define:
 #     guardrails.style_guard.*, guardrails.safety_guard.*, guardrails.length_guard.* (optional).
+
